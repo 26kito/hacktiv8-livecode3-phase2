@@ -21,6 +21,7 @@ func Routes(db *gorm.DB) {
 	e.POST("/users/login", userService.Login)
 
 	e.GET("/users/carts", cartService.GetCarts, middleware.ValidateJWTMiddleware)
+	e.POST("/users/carts", cartService.AddToCart, middleware.ValidateJWTMiddleware)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

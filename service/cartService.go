@@ -40,3 +40,31 @@ func (cs *CartService) GetCarts(c echo.Context) error {
 		Data:    carts,
 	})
 }
+
+func (cs *CartService) AddToCart(c echo.Context) error {
+	var request entity.AddToCartPayload
+
+	c.Bind(&request)
+
+	// Get the user ID from the JWT claims
+	userID := c.Get("user").(jwt.MapClaims)["user_id"].(float64)
+
+	// Add the product to the user's cart
+	response, err := cs.CartRepository.AddToCart(int(userID), request.ProductID, request.Quantity)
+
+	if err != nil {
+		errCode, _ := strconv.Atoi(err.Error()[:3])
+		errMessage := err.Error()[6:]
+
+		return c.JSON(errCode, entity.ResponseError{
+			Status:  errCode,
+			Message: errMessage,
+		})
+	}
+
+	return c.JSON(201, entity.ResponseOK{
+		Status:  201,
+		Message: "Product added to cart successfully",
+		Data:    response,
+	})
+}

@@ -25,3 +25,8 @@ type CartResponse struct {
 	User      UserResponse `json:"user"`
 	Product   Product      `json:"product"`
 }
+
+type AddToCartPayload struct {
+	ProductID uint `json:"product_id"`
+	Quantity  int  `json:"quantity"`
+}
