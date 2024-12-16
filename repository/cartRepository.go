@@ -82,3 +82,18 @@ func (cr *CartRepository) AddToCart(userID int, productID uint, quantity int) (*
 
 	return &cartResponse, nil
 }
+
+func (cr *CartRepository) DeleteCartByID(userID, cartID int) error {
+	// Fetch the cart
+	var cart entity.Cart
+	if err := cr.DB.Where("user_id = ? AND cart_id = ?", userID, cartID).First(&cart).Error; err != nil {
+		return err
+	}
+
+	// Delete the cart
+	if err := cr.DB.Delete(&cart).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
