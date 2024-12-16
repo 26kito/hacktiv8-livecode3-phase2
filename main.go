@@ -11,4 +11,6 @@ func main() {
 
 	config.InitDB()
 	db := config.DB
+
+	config.Routes(db)
 }
