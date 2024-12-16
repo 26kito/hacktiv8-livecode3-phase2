@@ -15,6 +15,7 @@ func Routes(db *gorm.DB) {
 	userService := service.NewUserService(userRepository)
 
 	e.POST("/users/register", userService.Register)
+	e.POST("/users/login", userService.Login)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

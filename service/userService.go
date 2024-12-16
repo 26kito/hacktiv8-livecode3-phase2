@@ -3,9 +3,11 @@ package service
 import (
 	"fmt"
 	"hacktiv8-lc3-p2/entity"
+	getJWTSecret "hacktiv8-lc3-p2/middleware"
 	"hacktiv8-lc3-p2/repository"
 	"strconv"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,11 +57,66 @@ func (us *UserService) Register(c echo.Context) error {
 	})
 }
 
+func (us *UserService) Login(c echo.Context) error {
+	var request entity.UserLoginPayload
+
+	c.Bind(&request)
+
+	if err := validateUserLoginPayload(request); err != nil {
+		errCode, _ := strconv.Atoi(err.Error()[:3])
+		errMessage := err.Error()[6:]
+
+		return c.JSON(errCode, entity.ResponseError{
+			Status:  errCode,
+			Message: errMessage,
+		})
+	}
+
+	// Generate JWT token
+	jwtToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": request.Email,
+	}).SignedString(getJWTSecret.JWTSecret)
+
+	response, err := us.UserRepository.Login(request, jwtToken)
+
+	if err != nil {
+		errCode, _ := strconv.Atoi(err.Error()[:3])
+		errMessage := err.Error()[6:]
+
+		return c.JSON(int(errCode), entity.ResponseError{
+			Status:  errCode,
+			Message: errMessage,
+		})
+	}
+
+	return c.JSON(200, entity.ResponseOK{
+		Status:  200,
+		Message: "User logged in successfully",
+		Data: map[string]string{
+			"name":      response.Name,
+			"email":     response.Email,
+			"jwt_token": jwtToken,
+		},
+	})
+}
+
 func validateUserRegisterPayload(request entity.UserRegisterPayload) error {
 	if request.Name == "" {
 		return fmt.Errorf("400 | Name is required")
 	}
 
+	if request.Email == "" {
+		return fmt.Errorf("400 | Email is required")
+	}
+
+	if request.Password == "" {
+		return fmt.Errorf("400 | Password is required")
+	}
+
+	return nil
+}
+
+func validateUserLoginPayload(request entity.UserLoginPayload) error {
 	if request.Email == "" {
 		return fmt.Errorf("400 | Email is required")
 	}
