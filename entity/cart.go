@@ -15,3 +15,13 @@ type Cart struct {
 	User    User    `gorm:"foreignKey:UserID;references:user_id"`
 	Product Product `gorm:"foreignKey:ProductID;references:product_id"`
 }
+
+type CartResponse struct {
+	CartID    uint         `json:"cart_id"`
+	UserID    uint         `json:"user_id"`
+	ProductID uint         `json:"product_id"`
+	Quantity  int          `json:"quantity"`
+	CreatedAt time.Time    `json:"created_at"`
+	User      UserResponse `json:"user"`
+	Product   Product      `json:"product"`
+}

@@ -39,7 +39,7 @@ func (ur *UserRepository) Register(request entity.UserRegisterPayload) (*entity.
 	return &user, nil
 }
 
-func (ur *UserRepository) Login(request entity.UserLoginPayload, jwtToken string) (*entity.User, error) {
+func (ur *UserRepository) Login(request entity.UserLoginPayload) (*entity.User, error) {
 	var user entity.User
 
 	if err := ur.DB.Where("email = ?", request.Email).First(&user).Error; err != nil {
@@ -49,8 +49,6 @@ func (ur *UserRepository) Login(request entity.UserLoginPayload, jwtToken string
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
 		return nil, fmt.Errorf("401 | Email or password is incorrect")
 	}
-
-	ur.DB.Model(&user).Update("jwt_token", jwtToken)
 
 	return &user, nil
 }

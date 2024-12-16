@@ -6,6 +6,7 @@ import (
 	getJWTSecret "hacktiv8-lc3-p2/middleware"
 	"hacktiv8-lc3-p2/repository"
 	"strconv"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -73,11 +74,8 @@ func (us *UserService) Login(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	jwtToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": request.Email,
-	}).SignedString(getJWTSecret.JWTSecret)
 
-	response, err := us.UserRepository.Login(request, jwtToken)
+	response, err := us.UserRepository.Login(request)
 
 	if err != nil {
 		errCode, _ := strconv.Atoi(err.Error()[:3])
@@ -88,6 +86,12 @@ func (us *UserService) Login(c echo.Context) error {
 			Message: errMessage,
 		})
 	}
+
+	jwtToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": response.UserID,
+		"email":   request.Email,
+		"exp":     time.Now().Add(time.Hour * 1).Unix(),
+	}).SignedString(getJWTSecret.JWTSecret)
 
 	return c.JSON(200, entity.ResponseOK{
 		Status:  200,
