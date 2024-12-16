@@ -12,3 +12,12 @@ type Order struct {
 	User       User        `gorm:"foreignKey:UserID;references:user_id"`
 	OrderItems []OrderItem `gorm:"foreignKey:OrderID;references:order_id"`
 }
+
+type OrderResponse struct {
+	OrderID    uint                `json:"order_id"`
+	UserID     uint                `json:"user_id"`
+	TotalPrice float64             `json:"total_price"`
+	CreatedAt  time.Time           `json:"created_at"`
+	User       UserResponse        `json:"user"`
+	OrderItems []OrderItemResponse `json:"order_items"`
+}
